@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO: Add test for setting MinScore
+
 func TestMemorySearch(t *testing.T) {
 	// Test data
 	sessionID, err := testutils.GenerateRandomSessionID(16)

@@ -95,7 +95,7 @@ func searchMemory(
 		dbQuery = dbQuery.Limit(limit)
 	}
 
-	results, err := executeMessagesSearchScan(ctx, dbQuery)
+	results, err := executeMessagesSearchScan(ctx, query, dbQuery)
 	if err != nil {
 		return nil, store.NewStorageError("memory searchMemory failed", err)
 	}
@@ -221,10 +221,25 @@ func addMessagesSortQuery(searchText string, dbQuery *bun.SelectQuery, tablePref
 
 func executeMessagesSearchScan(
 	ctx context.Context,
+	query *models.MemorySearchPayload,
 	dbQuery *bun.SelectQuery,
 ) ([]models.MemorySearchResult, error) {
 	var results []models.MemorySearchResult
-	err := dbQuery.Scan(ctx, &results)
+
+	// if MinScore is not set, we can just scan the results
+	// If query.Text is empty, MinScore is meaningless
+	if query.MinScore == 0 || query.Text == "" {
+		err := dbQuery.Scan(ctx, &results)
+		return results, err
+	}
+
+	// if MinScore is set, we need to use a CTE and filter the CTE results
+	// because we can't filter on the dist column in the query
+	q := dbQuery.DB().NewSelect().
+		With("cte", dbQuery).
+		Table("cte").
+		Where("\"dist\" >= ?", query.MinScore)
+	err := q.Scan(ctx, &results)
 	return results, err
 }
 
