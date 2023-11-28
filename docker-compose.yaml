@@ -12,7 +12,7 @@ services:
       context: .
       dockerfile: Dockerfile.postgres
     networks:
-      - nginxproxy_default
+      - docaiapi_nginxproxy_default
     volumes:
       - zep-db:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +27,7 @@ services:
       - .env # You can set your embedding-related variables here
     restart: on-failure
     networks:
-      - nginxproxy_default
+      - docaiapi_nginxproxy_default
     healthcheck:
       test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/5557' || exit 1
       interval: 10s
@@ -66,9 +66,9 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - nginxproxy_default
+      - docaiapi_nginxproxy_default
 networks:
-  nginxproxy_default:
+  docaiapi_nginxproxy_default:
     external: true
 volumes:
   zep-db:
