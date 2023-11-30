@@ -10,6 +10,7 @@ out/
 *.dylib
 
 # Secrets
+.env
 .env.local
 
 # Test data
